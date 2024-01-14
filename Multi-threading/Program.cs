@@ -11,7 +11,7 @@ namespace Multi_threading
     {
         static void Main()
         {
-            for (int arraySize = 1_000_000_000; arraySize >= 1_000; arraySize /= 10)
+            for (int arraySize = 1_000; arraySize >= 1_00; arraySize /= 10)
             {
                 Console.WriteLine($"Array Size: {arraySize}");
                 for (int numThreads = 1; numThreads <= Environment.ProcessorCount; numThreads++)
