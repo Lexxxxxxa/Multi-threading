@@ -9,61 +9,42 @@ namespace Multi_threading
     class ArrayOperations
     {
         private int[] array;
-        private readonly object arrayLock = new object();
 
         public ArrayOperations(int size)
         {
             array = Enumerable.Range(1, size).Select(_ => new Random().Next(1, 100)).ToArray();
         }
 
-        public void GenerateRandomArray()
+        public void GenerateRandomArray(int start, int end)
         {
-            lock (arrayLock)
-            {
-                Console.WriteLine($"Generated array: [{string.Join(", ", array)}]");
-            }
+            Console.WriteLine($"Generated array: [{string.Join(", ", array.Skip(start).Take(end - start))}]");
         }
 
-        public void MinInArray()
+        public void MinInArray(int start, int end)
         {
-            lock (arrayLock)
-            {
-                Console.WriteLine($"Min in array: {array.Min()}");
-            }
+            Console.WriteLine($"Min in array: {array.Skip(start).Take(end - start).Min()}");
         }
 
-        public void MaxInArray()
+        public void MaxInArray(int start, int end)
         {
-            lock (arrayLock)
-            {
-                Console.WriteLine($"Max in array: {array.Max()}");
-            }
+            Console.WriteLine($"Max in array: {array.Skip(start).Take(end - start).Max()}");
         }
 
-        public void SumOfArray()
+        public void SumOfArray(int start, int end)
         {
-            lock (arrayLock)
-            {
-                Console.WriteLine($"Sum of array: {array.Sum()}");
-            }
+            Console.WriteLine($"Sum of array: {array.Skip(start).Take(end - start).Sum()}");
         }
 
-        public void AverageOfArray()
+        public void AverageOfArray(int start, int end)
         {
-            lock (arrayLock)
-            {
-                double average = array.Average();
-                Console.WriteLine($"Average of array: {average}");
-            }
+            double average = array.Skip(start).Take(end - start).Average();
+            Console.WriteLine($"Average of array: {average}");
         }
 
         public void CopySubarray(int start, int end)
         {
-            lock (arrayLock)
-            {
-                int[] subarray = array.Skip(start).Take(end - start).ToArray();
-                Console.WriteLine($"Copied subarray: [{string.Join(", ", subarray)}]");
-            }
+            int[] subarray = array.Skip(start).Take(end - start).ToArray();
+            Console.WriteLine($"Copied subarray: [{string.Join(", ", subarray)}]");
         }
     }
 }
