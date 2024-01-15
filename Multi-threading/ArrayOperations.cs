@@ -1,14 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Multi_threading
 {
     class ArrayOperations
     {
         private int[] array;
+        private static readonly object lockObject = new object();
+        private static readonly Random random = new Random();
+
+        public void FillArrayWithRandomData()
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = random.Next(1, 100);
+            }
+            Console.WriteLine($"Array filled with random data: [{string.Join(", ", array)}]");
+        }
 
         public ArrayOperations(int size)
         {
