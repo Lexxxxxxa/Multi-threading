@@ -1,53 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Diagnostics;
 
 namespace Multi_threading
 {
     class Program
     {
-        static void Main()
+        private static async Task Main(string[] args)
         {
-            Console.Write("Enter the size of the array: ");
-            int arraySize = int.Parse(Console.ReadLine());
+            int threadCount = 16;
 
-            Console.Write("Enter the number of threads: ");
-            int numThreads = int.Parse(Console.ReadLine());
+            int[] intArr = new int[1_000_000];
+            var intGen = new RandomArray<int>(threadCount, intArr, r => r.Next());
+            intGen.ProcessAsync();
 
-            ArrayOperations arrayOps = new ArrayOperations(arraySize);
-            TextOperations textOps = new TextOperations("This is a sample text for word frequency and character frequency.");
+            char[] charArr = new char[1_000_000];
+            var charGen = new RandomArray<char>(threadCount, charArr, r => (char)r.Next(32, 58));
+            charGen.ProcessAsync();
 
-            List<Thread> threads = new List<Thread>();
+            string[] strArr = new string[1_000_000];
+            var wordArr = new string[] { "Zero", "One", "Two", "Three" };
+            var strGen = new RandomArray<string>(threadCount, strArr, r => wordArr[r.Next(0, wordArr.Length)]);
+            strGen.ProcessAsync();
 
-            for (int i = 0; i < numThreads; i++)
-            {
-                Thread thread = new Thread(() => PerformOperations(arrayOps, textOps));
-                threads.Add(thread);
-            }
+            var maxProc = new MaxOfArray(threadCount, intArr);
+            var minProc = new MinOfArray(threadCount, intArr);
+            var sumProc = new SumOfArray(threadCount, intArr);
+            var averageProc = new AverageArray(threadCount, intArr);
+            var copyProc = new CopyArrayPart<int>(threadCount, intArr, new int[1785], 245, 1785);
+            var charProc = new CharFrequencyDictionary(threadCount, charArr);
+            var stringProc = new WordFrequencyDictionary(threadCount, strArr);
 
-            foreach (var thread in threads)
-            {
-                thread.Start();
-            }
+            IThreadsForArray[] processes = { maxProc, minProc, sumProc, averageProc, copyProc, charProc, stringProc };
 
-            foreach (var thread in threads)
-            {
-                thread.Join();
-            }
+            Print(processes);
         }
 
-        static void PerformOperations(ArrayOperations arrayOps, TextOperations textOps)
+        private static async Task Print(IThreadsForArray[] processes)
         {
-            arrayOps.GenerateRandomArray();
-            arrayOps.MinInArray();
-            arrayOps.MaxInArray();
-            arrayOps.SumOfArray();
-            arrayOps.AverageOfArray();
-            arrayOps.CopySubarray(1, 5);
-
-            textOps.CharacterFrequency();
-            textOps.WordFrequency();
+            foreach (var proc in processes)
+            {
+                var stopWatch = Stopwatch.StartNew();
+                proc.ProcessAsync();
+                stopWatch.Stop();
+                Console.WriteLine($"Time of thread {stopWatch.Elapsed}");
+            }
         }
     }
 }
