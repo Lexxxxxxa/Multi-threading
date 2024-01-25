@@ -4,63 +4,45 @@ namespace Multi_threading
 {
     class Program
     {
-        static void Main()
+        private static async Task Main(string[] args)
         {
-            for (int arraySize = 1_000_000_000; arraySize >= 1_000; arraySize /= 10)
+            int threadCount = 16;
+
+            int[] intArr = new int[1_000_000];
+            var intGen = new RandomArray<int>(threadCount, intArr, r => r.Next());
+            intGen.ProcessAsync();
+
+            char[] charArr = new char[1_000_000];
+            var charGen = new RandomArray<char>(threadCount, charArr, r => (char)r.Next(32, 58));
+            charGen.ProcessAsync();
+
+            string[] strArr = new string[1_000_000];
+            var wordArr = new string[] { "Zero", "One", "Two", "Three" };
+            var strGen = new RandomArray<string>(threadCount, strArr, r => wordArr[r.Next(0, wordArr.Length)]);
+            strGen.ProcessAsync();
+
+            var maxProc = new MaxOfArray(threadCount, intArr);
+            var minProc = new MinOfArray(threadCount, intArr);
+            var sumProc = new SumOfArray(threadCount, intArr);
+            var averageProc = new AverageArray(threadCount, intArr);
+            var copyProc = new CopyArrayPart<int>(threadCount, intArr, new int[1785], 245, 1785);
+            var charProc = new CharFrequencyDictionary(threadCount, charArr);
+            var stringProc = new WordFrequencyDictionary(threadCount, strArr);
+
+            IThreadsForArray[] processes = { maxProc, minProc, sumProc, averageProc, copyProc, charProc, stringProc };
+
+            Print(processes);
+        }
+
+        private static async Task Print(IThreadsForArray[] processes)
+        {
+            foreach (var proc in processes)
             {
-                Console.WriteLine($"Array Size: {arraySize}");
-                for (int numThreads = 1; numThreads <= Environment.ProcessorCount; numThreads++)
-                {
-                    var elapsedTime = MeasureExecutionTime(arraySize, numThreads);
-                    Console.WriteLine($"Threads: {numThreads}, Time: {elapsedTime} ms");
-                }
-                Console.WriteLine();
+                var stopWatch = Stopwatch.StartNew();
+                proc.ProcessAsync();
+                stopWatch.Stop();
+                Console.WriteLine($"Time of thread {stopWatch.Elapsed}");
             }
-        }
-
-        static long MeasureExecutionTime(int arraySize, int numThreads)
-        {
-            ArrayOperations arrayOps = new ArrayOperations(arraySize);
-            TextOperations textOps = new TextOperations();
-
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
-            PerformOperations(arrayOps, textOps, 0, arraySize);
-
-            stopwatch.Stop();
-            return stopwatch.ElapsedMilliseconds;
-        }
-
-        static void PerformOperations(ArrayOperations arrayOps, TextOperations textOps, int start, int end)
-        {
-            arrayOps.FillArrayWithRandomData();
-
-            Thread thread1 = new Thread(() => arrayOps.GenerateRandomArray(start, end));
-            Thread thread2 = new Thread(() => arrayOps.MinInArray(start, end));
-            Thread thread3 = new Thread(() => arrayOps.MaxInArray(start, end));
-            Thread thread4 = new Thread(() => arrayOps.SumOfArray(start, end));
-            Thread thread5 = new Thread(() => arrayOps.AverageOfArray(start, end));
-            Thread thread6 = new Thread(() => arrayOps.CopySubarray(start, end));
-            Thread thread7 = new Thread(() => textOps.CharacterFrequency());
-            Thread thread8 = new Thread(() => textOps.WordFrequency());
-
-            thread1.Start();
-            thread2.Start();
-            thread3.Start();
-            thread4.Start();
-            thread5.Start();
-            thread6.Start();
-            thread7.Start();
-            thread8.Start();
-
-            thread1.Join();
-            thread2.Join();
-            thread3.Join();
-            thread4.Join();
-            thread5.Join();
-            thread6.Join();
-            thread7.Join();
-            thread8.Join();
         }
     }
 }
